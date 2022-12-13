@@ -3,12 +3,12 @@ package game;
 import java.util.ArrayList;
 
 public class PuyoMove {
-    Puyo puyo1;
-    Puyo puyo2;
-    int dropCol = 2;
-    int dropOrientation;
-    int moveChain;
-    int moveScore;
+    public Puyo puyo1;
+    public Puyo puyo2;
+    public int dropCol = 2;
+    public int dropOrientation;
+    public int moveChain;
+    public int moveScore;
 
     public PuyoMove(Puyo puyo1, Puyo puyo2){
         this.puyo1 = puyo1;

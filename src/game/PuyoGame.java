@@ -6,7 +6,6 @@ import java.util.Random;
 public class PuyoGame extends PuyoBoard{
     PuyoMove[] queue = new PuyoMove[Parameters.QUEUE_SIZE];
     int queuePos = 0;
-    boolean isIdle = true;
 
     public PuyoGame(){
         for(int i=0; i<queue.length; i++){

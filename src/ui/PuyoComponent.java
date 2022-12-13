@@ -12,9 +12,11 @@ import java.awt.event.ActionListener;
 public class PuyoComponent extends JComponent {
     Puyo puyo;
     BoardPos pos;
+    BoardComponent parent;
 
-    public PuyoComponent(Puyo puyo){
+    public PuyoComponent(Puyo puyo, BoardComponent parent){
         this.puyo = puyo;
+        this.parent = parent;
     }
 
     @Override
@@ -35,8 +37,8 @@ public class PuyoComponent extends JComponent {
     public void updatePos(BoardPos pos){
         if(this.pos != pos){
             this.pos = pos;
-            int rowInc = getParent().getHeight()/ Parameters.ROWS;
-            int colInc = getParent().getWidth()/ Parameters.COLUMNS;
+            int rowInc = parent.getHeight()/ Parameters.ROWS;
+            int colInc = parent.getWidth()/ Parameters.COLUMNS;
             setSize(colInc, rowInc);
             move(new Point(colInc*pos.col, rowInc*pos.row), 500);
         }
