@@ -3,10 +3,6 @@ package game;
 import java.util.*;
 
 public class PuyoBoard {
-    public abstract interface SimStepHandler{
-        public void handleStep(boolean isFinished);
-    }
-
     static final int[] CHAIN_POWER = new int[]{0, 40, 320, 640, 1280, 2560, 3840, 5120, 6400, 7680, 8960, 10240, 11520, 12800, 14080, 15360, 16640, 17920, 19200, 20480};
     static final int[] COLOR_BONUS = new int[]{0, 0, 3, 6, 12, 24};
     static final int[] GROUP_BONUS = new int[]{0, 0, 0, 0, 0, 2, 3, 4, 5, 6, 7, 10};
@@ -23,6 +19,14 @@ public class PuyoBoard {
         c.currentMove = b.currentMove;
         c.currentScore = b.currentScore;
         return c;
+    }
+
+    public int currentScore(){
+        return currentScore;
+    }
+
+    public PuyoMove lastMove(){
+        return currentMove;
     }
 
     public Set<Puyo> activePuyo(){ return puyoPos.keySet(); }
@@ -90,7 +94,7 @@ public class PuyoBoard {
         nextStepOrigins.add(p2);
     }
 
-    public void simulateNextStep(SimStepHandler handler){
+    public void simulateNextStep(){
         Set<BoardPos> willPop = new HashSet<>();
         Set<Character> poppedColors = new HashSet<>();
         int groupBonus = 0;
@@ -115,8 +119,6 @@ public class PuyoBoard {
             if(puyoAt(new BoardPos(2, Parameters.ROWS-1)) != null)
                 currentMove.moveScore = currentScore = Integer.MIN_VALUE;
         }
-        if(handler != null)
-            handler.handleStep(!hasMoreSteps());
     }
 
     private HashSet<BoardPos> findGroup(BoardPos origin){

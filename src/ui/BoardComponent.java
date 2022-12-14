@@ -1,20 +1,18 @@
 package ui;
 
 import game.*;
-import org.w3c.dom.css.Rect;
 import ui.Utility.KeyPressListener;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
-public class BoardComponent extends JPanel implements PuyoBoard.SimStepHandler {
+public class BoardComponent extends JPanel {
     PuyoGame game;
     QueueComponent queueComp;
-    boolean isIdle = true;
     HashMap<Puyo, PuyoComponent> puyoComps = new HashMap<>();
 
     public BoardComponent(QueueComponent queueComp){
@@ -22,7 +20,7 @@ public class BoardComponent extends JPanel implements PuyoBoard.SimStepHandler {
 
         setFocusable(true);
         setLayout(null);
-        setPreferredSize(new Dimension(50*(Parameters.COLUMNS), 50*Parameters.ROWS));
+        setPreferredSize(new Dimension(50*(Parameters.COLUMNS), 50*Parameters.ROWS+75));
         setBackground(Color.BLACK);
 
         addKeyListener(new KeyPressListener() {
@@ -31,6 +29,7 @@ public class BoardComponent extends JPanel implements PuyoBoard.SimStepHandler {
                 onKeyPress(e);
             }
         });
+        System.out.println("GUI Thread: " + Thread.currentThread());
     }
 
     public void setGame(PuyoGame g){
@@ -45,6 +44,22 @@ public class BoardComponent extends JPanel implements PuyoBoard.SimStepHandler {
         queueComp.setGame(g);
         repaint();
     }
+
+    Timer updateTimer = new Timer(200, new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+            repaint();
+            if(!game.hasMoreSteps())
+                updateTimer.setRepeats(false);
+            else
+                game.dropStep();
+        }
+    });
 
     public void paintPuyo(Graphics2D g, Puyo puyo, int col, int row, int d){
         if(puyo != null){
@@ -68,6 +83,8 @@ public class BoardComponent extends JPanel implements PuyoBoard.SimStepHandler {
         int r = d/2;
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, getWidth(), getHeight());
+        g.setColor(Color.GRAY);
+        g.setStroke(new BasicStroke(3));
         for(int x=0; x<Parameters.COLUMNS; x++){
             for(int y=0; y<Parameters.ROWS; y++){
                 paintPuyo(g, game.puyoAt(new BoardPos(x, y)), x, y, d);
@@ -81,20 +98,22 @@ public class BoardComponent extends JPanel implements PuyoBoard.SimStepHandler {
         p2r = nextPair.dropOrientation==0? Parameters.ROWS-1 : Parameters.ROWS-2;
         paintPuyo(g, nextPair.puyo1, p1c, p1r, d);
         paintPuyo(g, nextPair.puyo2, p2c, p2r, d);
-    }
 
-    @Override
-    public void handleStep(boolean isFinished) {
-        repaint();
-        if(isFinished) {
-            isIdle = true;
+        g.drawLine(0, getHeight()-75, getWidth(), getHeight()-75);
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Yu Gothic", Font.BOLD, 32));
+        g.drawString("" + game.currentScore(), 10, getHeight()-35);
+        if(game.lastMove() == null)
+            return;
+        int chain = game.lastMove().moveChain;
+        if(chain > 0) {
+            g.setFont(new Font("Yu Gothic", Font.BOLD, 24));
+            g.drawString(chain + " chain!", getWidth() - 120, getHeight() - 35);
         }
     }
 
 
     public void onKeyPress(KeyEvent e) {
-        if (!isIdle)
-            return;
         if (e.getKeyChar() == 'z') {
             game.moveLeft();
             repaint();
@@ -108,10 +127,14 @@ public class BoardComponent extends JPanel implements PuyoBoard.SimStepHandler {
             game.rotateRight();
             repaint();
         } else if (e.getKeyChar() == ' ') {
-            isIdle = false;
-            game.dropSteps(this);
+            //isIdle = false;
+            game.drop(false);
             queueComp.repaint();
             repaint();
+            if(game.hasMoreSteps()) {
+                updateTimer.setRepeats(true);
+                updateTimer.start();
+            }
         }
     }
 }

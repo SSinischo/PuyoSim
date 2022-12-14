@@ -28,10 +28,4 @@ public class Main {
         f.setVisible(true);
         board.setGame(new PuyoGame());
     }
-    public static class MainPanel extends JPanel {
-        static BoardComponent board;
-        public MainPanel(){
-
-        }
-    }
 }

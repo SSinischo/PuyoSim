@@ -21,20 +21,18 @@ public class PuyoGame extends PuyoBoard{
         return queue[(queuePos+idx)%queue.length];
     }
 
-    public boolean moveLeft(){
+    public void moveLeft(){
         PuyoMove m = next();
         if(m.dropCol == 0 || m.dropOrientation == 3 && m.dropCol == 1)
-            return false;
+            return;
         m.dropCol -= 1;
-        return true;
     }
 
-    public boolean moveRight(){
+    public void moveRight(){
         PuyoMove m = next();
         if(m.dropCol == Parameters.COLUMNS-1 || m.dropOrientation == 1 && m.dropCol == Parameters.COLUMNS-2)
-            return false;
+            return;
         m.dropCol += 1;
-        return true;
     }
 
     public void rotateLeft(){
@@ -55,17 +53,19 @@ public class PuyoGame extends PuyoBoard{
             m.dropCol -= 1;
     }
 
-    public int drop(){
-        return dropSteps(null);
-    }
-
-    public int dropSteps(SimStepHandler handler){
+    public int drop(boolean inSteps){
         PuyoMove m = next();
         if(!isMoveValid(m)) return Integer.MIN_VALUE;
         queuePos++;
         makeMove(m);
-        while(hasMoreSteps())
-            simulateNextStep(handler);
+        simulateNextStep();
+        while(inSteps && hasMoreSteps())
+            simulateNextStep();
+        return currentScore;
+    }
+
+    public int dropStep(){
+        simulateNextStep();
         return currentScore;
     }
 
