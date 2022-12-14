@@ -42,12 +42,16 @@ public class PuyoGame extends PuyoBoard{
         m.dropOrientation -= m.dropOrientation == 0? -3 : 1;
         if(m.dropCol == 0 && m.dropOrientation == 3)
             m.dropCol += 1;
+        else if(m.dropCol == Parameters.COLUMNS-1 && m.dropOrientation == 1)
+            m.dropCol -= 1;
     }
 
     public void rotateRight(){
         PuyoMove m = next();
         m.dropOrientation += m.dropOrientation == 3? -3 : 1;
-        if(m.dropCol == Parameters.COLUMNS-1 && m.dropOrientation == 1)
+        if(m.dropCol == 0 && m.dropOrientation == 3)
+            m.dropCol += 1;
+        else if(m.dropCol == Parameters.COLUMNS-1 && m.dropOrientation == 1)
             m.dropCol -= 1;
     }
 

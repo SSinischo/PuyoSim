@@ -13,13 +13,16 @@ import java.util.Set;
 
 public class BoardComponent extends JPanel implements PuyoBoard.SimStepHandler {
     PuyoGame game;
+    QueueComponent queueComp;
     boolean isIdle = true;
     HashMap<Puyo, PuyoComponent> puyoComps = new HashMap<>();
 
-    public BoardComponent(){
+    public BoardComponent(QueueComponent queueComp){
+        this.queueComp = queueComp;
+
         setFocusable(true);
         setLayout(null);
-        setMinimumSize(new Dimension(530, 1000));
+        setPreferredSize(new Dimension(50*(Parameters.COLUMNS), 50*Parameters.ROWS));
         setBackground(Color.BLACK);
 
         addKeyListener(new KeyPressListener() {
@@ -39,41 +42,53 @@ public class BoardComponent extends JPanel implements PuyoBoard.SimStepHandler {
             add(pc);
             pc.updatePos(game.puyoPos(puyo));
         }
-        updateNextPair();
+        queueComp.setGame(g);
+        repaint();
+    }
+
+    public void paintPuyo(Graphics2D g, Puyo puyo, int col, int row, int d){
+        if(puyo != null){
+            row = Parameters.ROWS - row - 1;
+            g.setColor(Puyo.COLOR_MAP.get(puyo.color));
+            g.fillOval(col*d, row*d, d, d);
+            g.setColor(new Color(255, 255, 255, 50));
+            g.setStroke(new BasicStroke(3));
+            g.drawOval(col*d, row*d, d, d);
+        }
     }
 
     @Override
-    public void handleStep(boolean isFinished) {
-        for(Puyo p : Set.copyOf(puyoComps.keySet())){
-            BoardPos b = game.puyoPos(p);
-            if(b == null)
-                remove(puyoComps.remove(p));
-            else
-                puyoComps.get(p).updatePos(b);
+    public void paintComponent(Graphics gfx) {
+        Graphics2D g = (Graphics2D) gfx;
+        RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHints(rh);
+        int w = getWidth() / Parameters.COLUMNS;
+        int h = getHeight() / Parameters.ROWS;
+        int d = Math.min(w, h);
+        int r = d/2;
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, getWidth(), getHeight());
+        for(int x=0; x<Parameters.COLUMNS; x++){
+            for(int y=0; y<Parameters.ROWS; y++){
+                paintPuyo(g, game.puyoAt(new BoardPos(x, y)), x, y, d);
+            }
         }
-        if(isFinished)
-            isIdle = true;
-    }
-
-    void updateNextPair(){
         PuyoMove nextPair = game.next();
         int p1r, p1c, p2r, p2c;
         p1c = nextPair.dropCol;
         p2c = nextPair.dropOrientation==1? p1c+1 : nextPair.dropOrientation==3? p1c-1 : p1c;
         p1r = nextPair.dropOrientation==2? Parameters.ROWS-1 : Parameters.ROWS-2;
-        p2r = nextPair.dropOrientation==0? p1r+1 : p1r;
-        PuyoComponent pc1 = puyoComps.get(nextPair.puyo1);
-        PuyoComponent pc2 = puyoComps.get(nextPair.puyo2);
-        if(pc1 == null){
-            pc1 = new PuyoComponent(nextPair.puyo1, this);
-            pc2 = new PuyoComponent(nextPair.puyo2, this);
-            puyoComps.put(nextPair.puyo1, pc1);
-            puyoComps.put(nextPair.puyo2, pc2);
-            add(pc1);
-            add(pc2);
+        p2r = nextPair.dropOrientation==0? Parameters.ROWS-1 : Parameters.ROWS-2;
+        paintPuyo(g, nextPair.puyo1, p1c, p1r, d);
+        paintPuyo(g, nextPair.puyo2, p2c, p2r, d);
+    }
+
+    @Override
+    public void handleStep(boolean isFinished) {
+        repaint();
+        if(isFinished) {
+            isIdle = true;
         }
-        pc1.updatePos(new BoardPos(p1c, p1r));
-        pc2.updatePos(new BoardPos(p2c, p2r));
     }
 
 
@@ -82,20 +97,21 @@ public class BoardComponent extends JPanel implements PuyoBoard.SimStepHandler {
             return;
         if (e.getKeyChar() == 'z') {
             game.moveLeft();
-            updateNextPair();
+            repaint();
         } else if (e.getKeyChar() == 'x') {
             game.moveRight();
-            updateNextPair();
+            repaint();
         } else if (e.getKeyChar() == '.') {
             game.rotateLeft();
-            updateNextPair();
+            repaint();
         } else if (e.getKeyChar() == '/') {
             game.rotateRight();
-            updateNextPair();
+            repaint();
         } else if (e.getKeyChar() == ' ') {
             isIdle = false;
             game.dropSteps(this);
-            updateNextPair();
+            queueComp.repaint();
+            repaint();
         }
     }
 }

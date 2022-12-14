@@ -1,5 +1,6 @@
 import game.PuyoGame;
 import ui.BoardComponent;
+import ui.QueueComponent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,10 +14,16 @@ public class Main {
             System.out.println("Look and Feel not set");
         }
         JFrame f = new JFrame("PuyoSim");
+        JPanel p = new JPanel();
 
-        BoardComponent board = new BoardComponent();
+        QueueComponent queue = new QueueComponent();
+        BoardComponent board = new BoardComponent(queue);
 
-        f.add(board);
+        p.setLayout(new BoxLayout(p, BoxLayout.X_AXIS));
+        p.add(board);
+        p.add(queue);
+
+        f.add(p);
         f.pack();
         f.setVisible(true);
         board.setGame(new PuyoGame());

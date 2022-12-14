@@ -40,49 +40,51 @@ public class PuyoComponent extends JComponent {
             int rowInc = parent.getHeight()/ Parameters.ROWS;
             int colInc = parent.getWidth()/ Parameters.COLUMNS;
             setSize(colInc, rowInc);
-            move(new Point(colInc*pos.col, rowInc*pos.row), 500);
+            move(new Point(colInc*pos.col, rowInc*(Parameters.ROWS-1-pos.row)), 500);
         }
     }
 
 
     public void move(Point targetPosition, int duration) {
-        // Get the current position of the component
-        Point currentPosition = getLocation();
-
-        // Calculate the distance to move the component in the x and y directions
-        int dx = targetPosition.x - currentPosition.x;
-        int dy = targetPosition.y - currentPosition.y;
-
-        // Determine the number of steps needed to move the component
-        int steps = duration / 20;
-
-        // Calculate the amount to move the component in each step
-        int stepX = dx / steps;
-        int stepY = dy / steps;
-
-        // Create a Timer to perform the animation
-        Timer timer = new Timer(20, new ActionListener() {
-            private int counter = 0;
-
-            public void actionPerformed(ActionEvent e) {
-                // Move the component by the appropriate amount
-                currentPosition.x += stepX;
-                currentPosition.y += stepY;
-                setLocation(currentPosition);
-
-                // Increment the counter
-                counter++;
-
-                // Stop the Timer when the desired number of steps has been reached
-                if (counter == steps) {
-                    ((Timer) e.getSource()).stop();
-
-                    // Set the final position of the component to ensure it is exactly at the target position
-                    setLocation(targetPosition);
-                }
-            }
-        });
-
-        timer.start();
+        setLocation(targetPosition);
+        return;
+//        // Get the current position of the component
+//        Point currentPosition = getLocation();
+//
+//        // Calculate the distance to move the component in the x and y directions
+//        int dx = targetPosition.x - currentPosition.x;
+//        int dy = targetPosition.y - currentPosition.y;
+//
+//        // Determine the number of steps needed to move the component
+//        int steps = duration / 20;
+//
+//        // Calculate the amount to move the component in each step
+//        int stepX = dx / steps;
+//        int stepY = dy / steps;
+//
+//        // Create a Timer to perform the animation
+//        Timer timer = new Timer(20, new ActionListener() {
+//            private int counter = 0;
+//
+//            public void actionPerformed(ActionEvent e) {
+//                // Move the component by the appropriate amount
+//                currentPosition.x += stepX;
+//                currentPosition.y += stepY;
+//                setLocation(currentPosition);
+//
+//                // Increment the counter
+//                counter++;
+//
+//                // Stop the Timer when the desired number of steps has been reached
+//                if (counter == steps) {
+//                    ((Timer) e.getSource()).stop();
+//
+//                    // Set the final position of the component to ensure it is exactly at the target position
+//                    setLocation(targetPosition);
+//                }
+//            }
+//        });
+//
+//        timer.start();
     }
 }
